@@ -9,15 +9,10 @@ Construído com tecnologia leve, ultra-rápida e **100% compatível com Hospedag
 ## 🌟 Principais Recursos e Funcionalidades
 
 ### 🛒 Loja Virtual & Catálogo de Produtos
-- **Catálogo Completo com Produtos Médicos Reais**:
-  - Monitores Multiparâmetricos de UTI (12.1" com SpO2, ECG e PNI)
-  - Cardioversores Desfibriladores Bifásicos com Marcapasso e DEA
-  - Autoclaves Hospitalares Digitais em Aço Inox (Sercon)
-  - Ventiladores Pulmonares Microprocessados UTI Adulto/Pediátrico (Magnamed)
-  - Pranchas de Imobilização e Resgate em Polietileno (Protec)
-  - Bisturis Eletrônicos Eletrocirúrgicos de Alta Frequência
-  - Balanças Antropométricas Digitais com Estadiômetro (Welmy)
-  - Sensores de Oximetria SpO2, Eletrodos de ECG, Microscópios e Cicloergômetros
+- **Catálogo Completo com TODOS os 190 Produtos Reais da Norte Médica**:
+  - Extração completa de 100% dos produtos do site oficial com fotos em alta resolução no CDN CloudFront original.
+  - 13 Departamentos Médicos / Cirúrgicos e 79 Marcas Fabricantes (Instramed, Sercon, Magnamed, Protec, Welmy, Baumer, Riester, Mindray, Yuwell, Deltronix, etc.).
+  - Monitores Multiparâmetricos de UTI, Desfibriladores Bifásicos, Autoclaves Sercon, Ventiladores Pulmonares, Pranchas de Imobilização, Bisturis Eletrônicos, Balanças Welmy, Otoscópios, Centrífugas Clínicas, Sensores de Oximetria SpO2, Traqueias de Silicone, Seladoras, Filtros HMEF e Descartáveis.
 - **Busca Instantânea Inteligente**: Busca com autocomplete dinâmico por nome, SKU ou marca fabricante.
 - **Filtros por Categorias e Marcas**: Navegação por departamentos (Hospitalar, Cirúrgico, Esterilização, Oxigenoterapia, Resgate, Laboratório).
 - **Página de Detalhes do Produto**:

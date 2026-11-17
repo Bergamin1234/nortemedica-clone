@@ -40,9 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 // 1. Testar conexão com o MySQL
                 $dsn = "mysql:host={$db_host};dbname={$db_name};charset=utf8mb4";
-                $pdo = new PDO($dsn, $db_user, $db_pass, [
+                $options = [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-                ]);
+                ];
+                if (defined('PDO::MYSQL_ATTR_MULTI_STATEMENTS')) {
+                    $options[PDO::MYSQL_ATTR_MULTI_STATEMENTS] = true;
+                }
+                $pdo = new PDO($dsn, $db_user, $db_pass, $options);
 
                 // 2. Importar o arquivo database.sql
                 $sqlPath = __DIR__ . '/database.sql';

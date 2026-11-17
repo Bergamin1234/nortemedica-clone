@@ -1,6 +1,4 @@
-# Arquivos de dados locais
-data/
-*.sqlite
+# Logs e temporários
 *.sqlite-journal
 *.log
 
