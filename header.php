@@ -18,6 +18,10 @@ $carrinhoCount = isset($_SESSION['carrinho']) ? array_sum($_SESSION['carrinho'])
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($pageTitle) ? htmlspecialchars($pageTitle) . ' | ' . SITE_NOME : SITE_NOME . ' - Hospitalar, Cirúrgico e Laboratorial'; ?></title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <link rel="apple-touch-icon" href="assets/img/icon.png">
+    
     <!-- Metas SEO -->
     <meta name="description" content="Produtos e equipamentos médicos, hospitalares e laboratoriais em Rondônia e todo o Brasil. Venda e assistência técnica autorizada.">
     <meta name="keywords" content="equipamentos hospitalares, autoclave, monitor multiparametrico, desfibrilador, porto velho, rondonia, norte medica, produtos medicos">
@@ -82,19 +86,9 @@ $carrinhoCount = isset($_SESSION['carrinho']) ? array_sum($_SESSION['carrinho'])
         <div class="max-w-7xl mx-auto px-4 py-3 md:py-4">
             <div class="flex items-center justify-between gap-4 md:gap-8">
                 
-                <!-- Logo Norte Médica -->
-                <a href="index.php" class="flex items-center space-x-3 group shrink-0">
-                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-950 text-white flex items-center justify-center text-2xl shadow-md border-b-2 border-emerald-500 group-hover:scale-105 transition">
-                        <i class="fa-solid fa-heart-pulse text-emerald-400"></i>
-                    </div>
-                    <div>
-                        <span class="text-xl md:text-2xl font-black text-blue-950 tracking-tight flex items-center">
-                            NORTE<span class="text-red-600 ml-1">MÉDICA</span>
-                        </span>
-                        <span class="block text-[10px] md:text-[11px] font-bold text-slate-400 tracking-wider uppercase -mt-1">
-                            Hospitalar & Cirúrgica
-                        </span>
-                    </div>
+                <!-- Logo Norte Médica Oficial -->
+                <a href="index.php" class="flex items-center group shrink-0 py-1">
+                    <img src="assets/img/logo.png" alt="Norte Médica" class="h-9 sm:h-11 md:h-12 w-auto object-contain group-hover:opacity-95 transition">
                 </a>
 
                 <!-- Campo de Busca em Tempo Real -->

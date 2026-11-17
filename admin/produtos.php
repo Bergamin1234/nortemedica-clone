@@ -112,6 +112,7 @@ $marcas = $pdo->query("SELECT * FROM marcas ORDER BY nome ASC")->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciador de Produtos - Norte Médica</title>
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -122,11 +123,9 @@ $marcas = $pdo->query("SELECT * FROM marcas ORDER BY nome ASC")->fetchAll();
     <!-- Header do Painel -->
     <header class="bg-blue-950 text-white shadow-md border-b-2 border-emerald-500 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="index.php" class="flex items-center space-x-2 font-black text-lg">
-                <span class="w-8 h-8 rounded-lg bg-emerald-500 text-blue-950 flex items-center justify-center font-black">
-                    <i class="fa-solid fa-heart-pulse text-sm"></i>
-                </span>
-                <span>NORTE<span class="text-red-500">MÉDICA</span> ADMIN</span>
+            <a href="index.php" class="flex items-center space-x-2">
+                <img src="../assets/img/logo-white.png" alt="Norte Médica Admin" class="h-8 w-auto object-contain">
+                <span class="text-xs bg-emerald-500 text-blue-950 font-black px-2 py-0.5 rounded uppercase">Admin</span>
             </a>
 
             <nav class="hidden md:flex items-center space-x-6 text-xs font-semibold">

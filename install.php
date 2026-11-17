@@ -93,6 +93,7 @@ $writable = is_writable(__DIR__);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instalador HostGator (Alligator) - Norte Médica</title>
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -103,10 +104,8 @@ $writable = is_writable(__DIR__);
     <!-- Header Simples -->
     <header class="bg-blue-950 text-white py-6 shadow-md border-b-4 border-emerald-500">
         <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white p-2 rounded-lg text-blue-950 flex items-center justify-center font-black text-xl shadow">
-                    <i class="fa-solid fa-staff-snake text-emerald-600 mr-1.5 text-2xl"></i> NORTE MÉDICA
-                </div>
+            <div class="flex items-center space-x-4">
+                <img src="assets/img/logo-white.png" alt="Norte Médica" class="h-8 w-auto object-contain">
                 <span class="text-xs bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
                     Instalador HostGator
                 </span>

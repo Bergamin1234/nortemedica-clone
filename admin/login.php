@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Administrativo - Norte Médica</title>
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -49,11 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-700">
         
         <div class="bg-blue-950 p-8 text-center text-white border-b-4 border-emerald-500">
-            <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-3 text-emerald-400">
-                <i class="fa-solid fa-heart-pulse"></i>
-            </div>
-            <h1 class="text-2xl font-black tracking-tight">NORTE<span class="text-red-500">MÉDICA</span></h1>
-            <p class="text-xs text-slate-300 mt-1 uppercase tracking-wider font-semibold">Painel de Gestão E-Commerce</p>
+            <img src="../assets/img/icon.png" alt="Norte Médica" class="w-16 h-16 mx-auto mb-3 object-contain drop-shadow">
+            <img src="../assets/img/logo-white.png" alt="Norte Médica" class="h-8 mx-auto object-contain">
+            <p class="text-[11px] text-slate-300 mt-2 uppercase tracking-wider font-semibold">Painel de Gestão E-Commerce</p>
         </div>
 
         <div class="p-8 space-y-6">

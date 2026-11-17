@@ -54,10 +54,7 @@
             <!-- Coluna 1: Sobre a Empresa -->
             <div class="space-y-4">
                 <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-lg bg-white text-blue-950 flex items-center justify-center font-black text-sm">
-                        <i class="fa-solid fa-heart-pulse text-emerald-600"></i>
-                    </div>
-                    <span class="text-lg font-black text-white tracking-tight">NORTE<span class="text-red-500">MÉDICA</span></span>
+                    <img src="assets/img/logo-white.png" alt="Norte Médica" class="h-8 w-auto object-contain">
                 </div>
                 <p class="text-slate-400 leading-relaxed">
                     Desde 2004 sendo referência no comércio atacadista de materiais, equipamentos médico-hospitalares, cirúrgicos e laboratoriais na Região Norte e no Brasil.
