@@ -46,7 +46,7 @@ $parcelaValor = $precoPor / MAX_PARCELAS_CARTAO;
 
 // Busca produtos relacionados
 $stmtRel = $pdo->prepare("
-    SELECT id, nome, slug, preco_por, preco_de, imagem_url, m.nome as marca_nome
+    SELECT p.id, p.nome, p.slug, p.preco_por, p.preco_de, p.imagem_url, m.nome as marca_nome
     FROM produtos p
     LEFT JOIN marcas m ON p.marca_id = m.id
     WHERE p.categoria_id = ? AND p.id != ? AND p.ativo = 1
