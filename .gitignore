@@ -1,0 +1,9 @@
+# Arquivos de dados locais
+data/
+*.sqlite
+*.sqlite-journal
+*.log
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
