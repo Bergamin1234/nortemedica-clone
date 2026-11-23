@@ -26,6 +26,16 @@ $carrinhoCount = isset($_SESSION['carrinho']) ? array_sum($_SESSION['carrinho'])
     <meta name="description" content="Produtos e equipamentos médicos, hospitalares e laboratoriais em Rondônia e todo o Brasil. Venda e assistência técnica autorizada.">
     <meta name="keywords" content="equipamentos hospitalares, autoclave, monitor multiparametrico, desfibrilador, porto velho, rondonia, norte medica, produtos medicos">
     
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NMQ5ZSDTFH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-NMQ5ZSDTFH');
+    </script>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
