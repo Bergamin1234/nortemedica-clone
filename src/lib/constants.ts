@@ -1,6 +1,6 @@
 export const SITE_CONFIG = {
-  nome: "Norte Médica - Distribuidora Hospitalar & Cirúrgica",
-  nomeCurto: "Norte Médica",
+  nome: "Nortemedica - Distribuidora Hospitalar & Cirúrgica",
+  nomeCurto: "Nortemedica",
   slogan: "Produtos e Equipamentos Médicos, Hospitalares, Laboratório e Assistência Técnica",
   cnpj: "06.273.744/0001-40",
   endereco: "Rua Guanabara, 1275 - Bairro Nossa Senhora das Graças, Porto Velho - RO",

@@ -66,7 +66,7 @@ export function CartDrawer() {
                   />
                   <div className="flex-1 min-w-0">
                     <span className="text-[10px] font-bold text-blue-900 uppercase tracking-wider block">
-                      {product.marca_nome || "Norte Médica"}
+                      {product.marca_nome || "Nortemedica"}
                     </span>
                     <Link
                       href={`/produto/${product.slug}`}

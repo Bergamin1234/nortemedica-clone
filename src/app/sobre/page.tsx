@@ -5,7 +5,7 @@ import { SITE_CONFIG } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Quem Somos e Assistência Técnica",
-  description: "História da Norte Médica, distribuidora hospitalar, cirúrgica e engenharia clínica em Porto Velho - RO."
+  description: "História da Nortemedica, distribuidora hospitalar, cirúrgica e engenharia clínica em Porto Velho - RO."
 };
 
 export default function SobrePage() {
@@ -27,7 +27,7 @@ export default function SobrePage() {
             Desde 2004 em Porto Velho - RO
           </span>
           <h1 className="text-3xl md:text-5xl font-black text-blue-950 tracking-tight">
-            Norte Médica Comércio e Representações
+            Nortemedica Comércio e Representações
           </h1>
           <p className="text-slate-600 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
             Distribuidora especializada em equipamentos médico-hospitalares, cirúrgicos e

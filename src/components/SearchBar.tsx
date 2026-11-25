@@ -138,7 +138,7 @@ export function SearchBar({ mobile = false }: { mobile?: boolean }) {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="text-[10px] text-blue-900 font-bold uppercase">
-                      {p.marca_nome || "Norte Médica"}
+                      {p.marca_nome || "Nortemedica"}
                     </div>
                     <div className="text-xs font-semibold text-slate-800 truncate">{p.nome}</div>
                     <div className="text-xs font-bold text-emerald-600">

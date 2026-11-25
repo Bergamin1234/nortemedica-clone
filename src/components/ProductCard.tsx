@@ -51,7 +51,7 @@ export function ProductCard({ product }: { product: Product }) {
         <div>
           <div className="flex items-center justify-between text-[11px] mb-1.5">
             <span className="font-extrabold text-blue-950 uppercase tracking-wider truncate pr-2">
-              {product.marca_nome || "Norte Médica"}
+              {product.marca_nome || "Nortemedica"}
             </span>
             <span className="text-slate-400 font-mono shrink-0">{product.sku}</span>
           </div>

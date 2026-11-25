@@ -115,7 +115,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-3 text-xs">
                 <span className="bg-blue-950 text-white font-extrabold px-3 py-1 rounded-md uppercase tracking-wider text-[11px]">
-                  {product.marca_nome || "Norte Médica"}
+                  {product.marca_nome || "Nortemedica"}
                 </span>
                 <span className="text-slate-400 font-mono">Código: {product.sku}</span>
                 <span className="text-emerald-700 bg-emerald-50 font-bold px-2.5 py-0.5 rounded-full text-[11px] flex items-center gap-1">

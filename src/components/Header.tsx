@@ -75,7 +75,7 @@ export function Header() {
             <Link href="/" className="flex items-center group shrink-0 py-0.5">
               <img
                 src="/images/logo.png"
-                alt="Norte Médica"
+                alt="Nortemedica"
                 className="h-9 sm:h-11 md:h-12 w-auto object-contain group-hover:opacity-95 transition"
               />
             </Link>

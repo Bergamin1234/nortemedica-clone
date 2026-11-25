@@ -49,7 +49,7 @@ export default function PedidoSucessoPage() {
   const pixPayload = order.dados_pagamento.copia_e_cola || "";
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixPayload)}`;
   const whatsMsg = encodeURIComponent(
-    `Olá! Realizei o pedido ${order.codigo_pedido} na Norte Médica no valor de ${formatBRL(order.total)} e gostaria de confirmar o status.`
+    `Olá! Realizei o pedido ${order.codigo_pedido} na Nortemedica no valor de ${formatBRL(order.total)} e gostaria de confirmar o status.`
   );
 
   return (
