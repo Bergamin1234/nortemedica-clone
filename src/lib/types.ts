@@ -29,11 +29,34 @@ export interface Product {
   imagem_url: string;
   destaque: number;
   lancamento: number;
+  oferta?: number;
+  desconto_pix?: number;
+  max_parcelas?: number;
+  parcelas_sem_juros?: number;
   ativo: number;
   categoria_nome: string;
   categoria_slug: string;
   marca_nome: string;
   marca_slug: string;
+}
+
+export interface ProductOverride {
+  nome?: string;
+  sku?: string;
+  marca_nome?: string;
+  categoria_nome?: string;
+  descricao_curta?: string;
+  descricao_longa?: string;
+  especificacoes?: string;
+  imagem_url?: string;
+  preco_de?: number;
+  preco_por?: number;
+  desconto_pix?: number;
+  max_parcelas?: number;
+  parcelas_sem_juros?: number;
+  lancamento?: number;
+  oferta?: number;
+  estoque?: number;
 }
 
 export interface CartItem {

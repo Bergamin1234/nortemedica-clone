@@ -4,6 +4,7 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import { CatalogOverridesProvider } from "@/context/CatalogOverridesContext";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -46,12 +47,14 @@ export default function RootLayout({
           `}
         </Script>
 
-        <CartProvider>
-          <Header />
-          <CartDrawer />
-          {children}
-          <Footer />
-        </CartProvider>
+        <CatalogOverridesProvider>
+          <CartProvider>
+            <Header />
+            <CartDrawer />
+            {children}
+            <Footer />
+          </CartProvider>
+        </CatalogOverridesProvider>
         <Analytics />
       </body>
     </html>

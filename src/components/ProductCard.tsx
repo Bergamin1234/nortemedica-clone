@@ -1,37 +1,49 @@
+"use client";
+
 import Link from "next/link";
 import { Eye } from "lucide-react";
 import type { Product } from "@/lib/types";
-import { formatBRL, getPixPrice, SITE_CONFIG } from "@/lib/constants";
+import { formatBRL, SITE_CONFIG } from "@/lib/constants";
+import { useCatalogOverrides } from "@/context/CatalogOverridesContext";
 import { AddToCartButton } from "./AddToCartButton";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product: rawProduct }: { product: Product }) {
+  const { applyProductOverride } = useCatalogOverrides();
+  const product = applyProductOverride(rawProduct);
+
   const precoPor = product.preco_por;
   const precoDe = product.preco_de;
-  const precoPix = getPixPrice(precoPor);
-  const parcelaValor = precoPor / SITE_CONFIG.maxParcelasCartao;
+  const descontoPix = product.desconto_pix ?? SITE_CONFIG.descontoPixPercentual;
+  const maxParcelas = Math.max(1, product.max_parcelas ?? SITE_CONFIG.maxParcelasCartao);
+  const precoPix = precoPor * (1 - descontoPix / 100);
+  const parcelaValor = precoPor / maxParcelas;
+  const isOferta = product.oferta !== undefined ? product.oferta === 1 : precoDe > precoPor;
+  const isLancamento = product.lancamento === 1;
 
   return (
     <article className="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col justify-between shadow-sm relative group">
       {/* Image & Badges */}
       <div className="relative bg-white p-4 border-b border-slate-100 flex items-center justify-center h-56 overflow-hidden">
         <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
-          {product.lancamento === 1 && (
+          {isLancamento && (
             <span className="bg-blue-950 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">
               Lançamento
             </span>
           )}
-          {precoDe > precoPor && (
+          {isOferta && (
             <span className="badge-discount text-white font-black text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">
               Oferta
             </span>
           )}
         </div>
 
-        <div className="absolute top-3 right-3 z-10">
-          <span className="badge-pix text-white font-black text-[10px] px-2.5 py-0.5 rounded-full shadow">
-            10% OFF PIX
-          </span>
-        </div>
+        {descontoPix > 0 && (
+          <div className="absolute top-3 right-3 z-10">
+            <span className="badge-pix text-white font-black text-[10px] px-2.5 py-0.5 rounded-full shadow">
+              {descontoPix}% OFF PIX
+            </span>
+          </div>
+        )}
 
         <Link
           href={`/produto/${product.slug}`}
@@ -65,7 +77,7 @@ export function ProductCard({ product }: { product: Product }) {
 
         {/* Prices */}
         <div className="mt-4 pt-3 border-t border-slate-100">
-          {precoDe > precoPor && (
+          {isOferta && precoDe > precoPor && (
             <span className="text-slate-400 line-through text-xs block">
               De {formatBRL(precoDe)}
             </span>
@@ -79,7 +91,9 @@ export function ProductCard({ product }: { product: Product }) {
 
           <div className="text-[11px] text-slate-600 mt-0.5">
             ou <strong>{formatBRL(precoPor)}</strong> em até{" "}
-            <strong>12x de {formatBRL(parcelaValor)}</strong>
+            <strong>
+              {maxParcelas}x de {formatBRL(parcelaValor)}
+            </strong>
           </div>
 
           <div className="mt-4 flex gap-2">
