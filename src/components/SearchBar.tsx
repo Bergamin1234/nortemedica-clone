@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import type { Product } from "@/lib/types";
-import { formatBRL, getPixPrice } from "@/lib/constants";
+import { formatBRL, SITE_CONFIG } from "@/lib/constants";
+import { useCatalogOverrides } from "@/context/CatalogOverridesContext";
 
 export function SearchBar({ mobile = false }: { mobile?: boolean }) {
+  const { applyProductOverride } = useCatalogOverrides();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [open, setOpen] = useState(false);
@@ -124,30 +126,46 @@ export function SearchBar({ mobile = false }: { mobile?: boolean }) {
                   Ver todos os resultados
                 </button>
               </div>
-              {results.map((p) => (
-                <Link
-                  key={p.id}
-                  href={`/produto/${p.slug}`}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center space-x-3 p-2.5 hover:bg-slate-50 transition border-b border-slate-50 last:border-0"
-                >
-                  <img
-                    src={p.imagem_url}
-                    alt={p.nome}
-                    className="w-11 h-11 object-contain rounded border border-slate-200 bg-white p-0.5 shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] text-blue-900 font-bold uppercase">
-                      {p.marca_nome || "Nortemedica"}
+              {results.map((rawP) => {
+                const p = applyProductOverride(rawP);
+                const isSobConsulta = Boolean(p.sob_consulta || p.preco_por <= 0);
+                const descPix = isSobConsulta
+                  ? 0
+                  : (p.desconto_pix ?? SITE_CONFIG.descontoPixPercentual);
+                const finalPrice = p.preco_por * (1 - descPix / 100);
+                return (
+                  <Link
+                    key={p.id}
+                    href={`/produto/${p.slug}`}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center space-x-3 p-2.5 hover:bg-slate-50 transition border-b border-slate-50 last:border-0"
+                  >
+                    <img
+                      src={p.imagem_url}
+                      alt={p.nome}
+                      className="w-11 h-11 object-contain rounded border border-slate-200 bg-white p-0.5 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] text-blue-900 font-bold uppercase">
+                        {p.marca_nome || "Nortemedica"}
+                      </div>
+                      <div className="text-xs font-semibold text-slate-800 truncate">{p.nome}</div>
+                      <div className="text-xs font-bold text-emerald-600">
+                        {isSobConsulta ? (
+                          <span className="text-slate-600">Preço sob consulta</span>
+                        ) : (
+                          <>
+                            {formatBRL(finalPrice)}{" "}
+                            <span className="text-[10px] font-normal text-slate-500">
+                              {descPix > 0 ? "no Pix" : "à vista"}
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-xs font-semibold text-slate-800 truncate">{p.nome}</div>
-                    <div className="text-xs font-bold text-emerald-600">
-                      {formatBRL(getPixPrice(p.preco_por))}{" "}
-                      <span className="text-[10px] font-normal text-slate-500">no Pix</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </>
           )}
         </div>

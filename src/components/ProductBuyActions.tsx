@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MessageCircle, Minus, Plus, ShoppingCart, Truck, Zap } from "lucide-react";
+import { FileText, MessageCircle, Minus, Plus, ShoppingCart, Truck, Zap } from "lucide-react";
 import type { Product, ShippingOption } from "@/lib/types";
 import { SITE_CONFIG } from "@/lib/constants";
 import { useCart } from "@/context/CartContext";
@@ -15,6 +16,8 @@ export function ProductBuyActions({ product }: { product: Product }) {
   const [shippingError, setShippingError] = useState("");
   const { addToCart } = useCart();
   const router = useRouter();
+
+  const isSobConsulta = Boolean(product.sob_consulta || product.preco_por <= 0);
 
   function handleBuyNow() {
     addToCart(product, qty, false);
@@ -50,8 +53,67 @@ export function ProductBuyActions({ product }: { product: Product }) {
   }
 
   const whatsMsg = encodeURIComponent(
-    `Olá, gostaria de solicitar uma cotação para o produto: ${product.nome} (Código: ${product.sku})`
+    `Olá, gostaria de solicitar orçamento para ${qty}x do produto: ${product.nome} (Código: ${product.sku})`
   );
+
+  if (isSobConsulta) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <label htmlFor="prod-qty" className="text-xs font-bold text-slate-700 uppercase">
+            Quantidade desejada:
+          </label>
+          <div className="flex items-center border border-slate-300 rounded-xl bg-white overflow-hidden shadow-sm">
+            <button
+              type="button"
+              aria-label="Diminuir quantidade"
+              onClick={() => setQty((q) => Math.max(1, q - 1))}
+              className="w-10 h-10 text-slate-600 hover:bg-slate-100 flex items-center justify-center"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <input
+              id="prod-qty"
+              type="number"
+              min={1}
+              max={99}
+              value={qty}
+              onChange={(e) => setQty(Math.max(1, Math.min(99, parseInt(e.target.value) || 1)))}
+              className="w-12 h-10 text-center font-bold text-sm border-0 focus:outline-none text-slate-800"
+            />
+            <button
+              type="button"
+              aria-label="Aumentar quantidade"
+              onClick={() => setQty((q) => Math.min(99, q + 1))}
+              className="w-10 h-10 text-slate-600 hover:bg-slate-100 flex items-center justify-center"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <a
+            href={`https://wa.me/${SITE_CONFIG.whatsapp}?text=${whatsMsg}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2 text-sm uppercase tracking-wider"
+          >
+            <MessageCircle className="w-4 h-4" aria-hidden="true" />
+            <span>Consultar no WhatsApp</span>
+          </a>
+
+          <Link
+            href="/contato"
+            className="bg-blue-950 hover:bg-blue-900 text-white font-bold py-3.5 px-6 rounded-2xl shadow transition flex items-center justify-center space-x-2 text-sm"
+          >
+            <FileText className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+            <span>Solicitar Proposta Formal</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">

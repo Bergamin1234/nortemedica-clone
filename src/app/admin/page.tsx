@@ -11,6 +11,7 @@ import {
   Image as ImageIcon,
   Lock,
   LogOut,
+  MessageCircle,
   Package,
   Pencil,
   Percent,
@@ -111,7 +112,10 @@ export default function AdminPage() {
   }
 
   function openEditModal(p: Product) {
-    const isOferta = p.oferta !== undefined ? p.oferta : p.preco_de > p.preco_por ? 1 : 0;
+    const isSobConsulta = Boolean(p.sob_consulta || p.preco_por <= 0);
+    const isOferta = isSobConsulta
+      ? 0
+      : (p.oferta !== undefined ? p.oferta : p.preco_de > p.preco_por ? 1 : 0);
     setEditingProduct(p);
     setEditForm({
       nome: p.nome,
@@ -122,6 +126,7 @@ export default function AdminPage() {
       descricao_longa: p.descricao_longa,
       especificacoes: p.especificacoes,
       imagem_url: p.imagem_url,
+      sob_consulta: isSobConsulta,
       preco_por: p.preco_por,
       preco_de: p.preco_de,
       desconto_pix: p.desconto_pix ?? SITE_CONFIG.descontoPixPercentual,
@@ -176,8 +181,9 @@ export default function AdminPage() {
     if (!editingProduct) return;
 
     const precoPor = Math.max(0, Number(editForm.preco_por) || 0);
-    let precoDe = Math.max(0, Number(editForm.preco_de) || 0);
-    const oferta = editForm.oferta === 1 ? 1 : 0;
+    const sobConsulta = Boolean(editForm.sob_consulta || precoPor <= 0);
+    let precoDe = sobConsulta ? 0 : Math.max(0, Number(editForm.preco_de) || 0);
+    const oferta = !sobConsulta && editForm.oferta === 1 ? 1 : 0;
     if (oferta === 1 && precoDe <= precoPor) {
       precoDe = Number((precoPor * 1.15).toFixed(2));
     }
@@ -191,11 +197,18 @@ export default function AdminPage() {
       descricao_longa: editForm.descricao_longa?.trim() ?? editingProduct.descricao_longa,
       especificacoes: editForm.especificacoes?.trim() ?? editingProduct.especificacoes,
       imagem_url: editForm.imagem_url?.trim() || editingProduct.imagem_url,
-      preco_por: precoPor,
+      sob_consulta: sobConsulta,
+      preco_por: sobConsulta ? 0 : precoPor,
       preco_de: precoDe,
-      desconto_pix: Math.min(90, Math.max(0, Number(editForm.desconto_pix ?? 10))),
-      max_parcelas: Math.min(24, Math.max(1, Number(editForm.max_parcelas ?? 12))),
-      parcelas_sem_juros: Math.min(24, Math.max(1, Number(editForm.parcelas_sem_juros ?? 6))),
+      desconto_pix: sobConsulta
+        ? 0
+        : Math.min(90, Math.max(0, Number(editForm.desconto_pix ?? 0))),
+      max_parcelas: sobConsulta
+        ? 1
+        : Math.min(24, Math.max(1, Number(editForm.max_parcelas ?? 12))),
+      parcelas_sem_juros: sobConsulta
+        ? 1
+        : Math.min(24, Math.max(1, Number(editForm.parcelas_sem_juros ?? 1))),
       lancamento: editForm.lancamento === 1 ? 1 : 0,
       oferta,
       estoque: Math.max(0, Number(editForm.estoque ?? editingProduct.estoque))
@@ -210,11 +223,14 @@ export default function AdminPage() {
   function copyAdjustmentsReport() {
     const lines = Object.entries(overrides).map(([idStr, ov]) => {
       const orig = baseProducts.find((p) => p.id === Number(idStr));
+      const priceTxt = ov.sob_consulta
+        ? "SOB CONSULTA"
+        : `${formatBRL(ov.preco_por ?? orig?.preco_por ?? 0)} (De: ${formatBRL(ov.preco_de ?? orig?.preco_de ?? 0)})`;
       return [
         `ID ${ov.sku ?? orig?.sku} (${ov.nome ?? orig?.nome})`,
         `  Empresa/Marca: ${orig?.marca_nome} -> ${ov.marca_nome ?? orig?.marca_nome}`,
-        `  Preço: ${orig?.preco_por} -> ${ov.preco_por ?? orig?.preco_por} (De: ${ov.preco_de ?? orig?.preco_de})`,
-        `  Desconto Pix: ${ov.desconto_pix ?? 10}% | Parcelas: ${ov.max_parcelas ?? 12}x (${ov.parcelas_sem_juros ?? 6}x s/ juros)`,
+        `  Preço: ${priceTxt}`,
+        `  Desconto Pix: ${ov.desconto_pix ?? 0}% | Parcelas: ${ov.max_parcelas ?? 12}x (${ov.parcelas_sem_juros ?? 1}x s/ juros)`,
         `  Lançamento: ${ov.lancamento ? "SIM" : "NÃO"} | Oferta: ${ov.oferta ? "SIM" : "NÃO"}`
       ].join("\n");
     });
@@ -328,13 +344,16 @@ export default function AdminPage() {
   const overrideCount = Object.keys(overrides).length;
 
   // Live preview calculations inside modal
+  const previewSobConsulta = Boolean(editForm.sob_consulta);
   const previewPrecoPor = Math.max(0, Number(editForm.preco_por) || 0);
   const previewPrecoDe = Math.max(0, Number(editForm.preco_de) || 0);
-  const previewDescontoPix = Math.min(90, Math.max(0, Number(editForm.desconto_pix ?? 10)));
+  const previewDescontoPix = previewSobConsulta
+    ? 0
+    : Math.min(90, Math.max(0, Number(editForm.desconto_pix ?? 0)));
   const previewMaxParcelas = Math.min(24, Math.max(1, Number(editForm.max_parcelas ?? 12)));
   const previewSemJuros = Math.min(
     previewMaxParcelas,
-    Math.max(1, Number(editForm.parcelas_sem_juros ?? 6))
+    Math.max(1, Number(editForm.parcelas_sem_juros ?? 1))
   );
   const previewPrecoPix = previewPrecoPor * (1 - previewDescontoPix / 100);
   const previewValorParcela = previewPrecoPor / previewMaxParcelas;
@@ -445,7 +464,7 @@ export default function AdminPage() {
         <div className="space-y-4">
           {overrideCount > 0 && (
             <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="text-emerald-950">
+              <div className="text-emerald-900">
                 <strong>{overrideCount} produto(s) personalizado(s) no painel.</strong> As
                 alterações já aparecem na vitrine e na página do produto neste navegador.
               </div>
@@ -528,18 +547,22 @@ export default function AdminPage() {
                     <th className="py-3 px-4">Produto / ID (SKU)</th>
                     <th className="py-3 px-4">Empresa (Marca)</th>
                     <th className="py-3 px-4">Destaques</th>
-                    <th className="py-3 px-4">Preços / Pix / Parcelas</th>
+                    <th className="py-3 px-4">Preços / Parcelas</th>
                     <th className="py-3 px-4 text-right">Ação Rápida</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredProducts.map((p) => {
                     const isModified = Boolean(overrides[p.id]);
-                    const descPix = p.desconto_pix ?? SITE_CONFIG.descontoPixPercentual;
+                    const isSobConsulta = Boolean(p.sob_consulta || p.preco_por <= 0);
+                    const descPix = isSobConsulta
+                      ? 0
+                      : (p.desconto_pix ?? SITE_CONFIG.descontoPixPercentual);
                     const maxParc = p.max_parcelas ?? SITE_CONFIG.maxParcelasCartao;
-                    const pixPrice = p.preco_por * (1 - descPix / 100);
+                    const finalPrice = p.preco_por * (1 - descPix / 100);
                     const isOferta =
-                      p.oferta !== undefined ? p.oferta === 1 : p.preco_de > p.preco_por;
+                      !isSobConsulta &&
+                      (p.oferta !== undefined ? p.oferta === 1 : p.preco_de > p.preco_por);
                     const isLancamento = p.lancamento === 1;
 
                     return (
@@ -587,24 +610,43 @@ export default function AdminPage() {
                                 Oferta
                               </span>
                             )}
-                            <span className="bg-emerald-100 text-emerald-800 font-bold text-[9px] px-2 py-0.5 rounded-full uppercase">
-                              {descPix}% Pix
-                            </span>
+                            {isSobConsulta && (
+                              <span className="bg-slate-800 text-white font-bold text-[9px] px-2 py-0.5 rounded-full uppercase">
+                                Sob Consulta
+                              </span>
+                            )}
+                            {!isSobConsulta && descPix > 0 && (
+                              <span className="bg-emerald-100 text-emerald-800 font-bold text-[9px] px-2 py-0.5 rounded-full uppercase">
+                                {descPix}% Pix
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          {isOferta && p.preco_de > p.preco_por && (
-                            <span className="text-[10px] text-slate-400 line-through block">
-                              De {formatBRL(p.preco_de)}
+                          {isSobConsulta ? (
+                            <span className="font-black text-slate-700 text-xs block">
+                              Preço sob consulta
                             </span>
+                          ) : (
+                            <>
+                              {isOferta && p.preco_de > p.preco_por && (
+                                <span className="text-[10px] text-slate-400 line-through block">
+                                  De {formatBRL(p.preco_de)}
+                                </span>
+                              )}
+                              <span className="font-black text-emerald-600 text-sm block">
+                                {formatBRL(finalPrice)}{" "}
+                                <span className="text-[10px] font-bold">
+                                  {descPix > 0 ? "no Pix" : "à vista"}
+                                </span>
+                              </span>
+                              {maxParc > 1 && (
+                                <span className="text-[10px] text-slate-500">
+                                  em até {maxParc}x
+                                </span>
+                              )}
+                            </>
                           )}
-                          <span className="font-black text-emerald-600 text-sm block">
-                            {formatBRL(pixPrice)}{" "}
-                            <span className="text-[10px] font-bold">no Pix</span>
-                          </span>
-                          <span className="text-[10px] text-slate-500">
-                            {formatBRL(p.preco_por)} em até {maxParc}x
-                          </span>
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="inline-flex items-center gap-1.5">
@@ -719,8 +761,8 @@ export default function AdminPage() {
                     Edição Rápida de Produto • ID {editForm.sku}
                   </h2>
                   <p className="text-[11px] text-slate-300">
-                    Modifique empresa, nome, ID, imagem, desconto Pix, parcelamento, lançamento,
-                    oferta e descrição
+                    Modifique empresa, nome, ID, imagem, preço/sob consulta, desconto Pix,
+                    parcelamento, lançamento, oferta e descrição
                   </p>
                 </div>
               </div>
@@ -752,12 +794,12 @@ export default function AdminPage() {
             >
               {/* Left Column: Live Preview Card & Image Editor & Badges */}
               <div className="lg:col-span-5 space-y-5">
-                {/* 1-Click Badges Toggles (Lançamento & Oferta) */}
+                {/* 1-Click Badges Toggles (Lançamento, Oferta & Sob Consulta) */}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
                   <span className="font-black text-blue-950 uppercase tracking-wider text-[11px] block">
-                    Tags e Destaques Visuais (1 Clique)
+                    Tags e Modo de Venda (1 Clique)
                   </span>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <button
                       type="button"
                       onClick={() =>
@@ -766,18 +808,18 @@ export default function AdminPage() {
                           lancamento: prev.lancamento === 1 ? 0 : 1
                         }))
                       }
-                      className={`p-3 rounded-xl border-2 font-black flex items-center justify-between transition ${
+                      className={`p-2.5 rounded-xl border-2 font-black flex items-center justify-between transition ${
                         editForm.lancamento === 1
                           ? "bg-blue-950 text-white border-blue-950 shadow-md"
                           : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
                       }`}
                     >
                       <span className="flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4" />
+                        <Sparkles className="w-3.5 h-3.5" />
                         <span>LANÇAMENTO</span>
                       </span>
                       <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full ${
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                           editForm.lancamento === 1
                             ? "bg-emerald-400 text-blue-950"
                             : "bg-slate-100 text-slate-500"
@@ -789,6 +831,7 @@ export default function AdminPage() {
 
                     <button
                       type="button"
+                      disabled={previewSobConsulta}
                       onClick={() =>
                         setEditForm((prev) => {
                           const nextOferta = prev.oferta === 1 ? 0 : 1;
@@ -804,24 +847,60 @@ export default function AdminPage() {
                           };
                         })
                       }
-                      className={`p-3 rounded-xl border-2 font-black flex items-center justify-between transition ${
-                        editForm.oferta === 1
+                      className={`p-2.5 rounded-xl border-2 font-black flex items-center justify-between transition disabled:opacity-40 ${
+                        !previewSobConsulta && editForm.oferta === 1
                           ? "bg-red-600 text-white border-red-600 shadow-md"
                           : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
                       }`}
                     >
                       <span className="flex items-center gap-1.5">
-                        <Tag className="w-4 h-4" />
+                        <Tag className="w-3.5 h-3.5" />
                         <span>OFERTA</span>
                       </span>
                       <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full ${
-                          editForm.oferta === 1
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                          !previewSobConsulta && editForm.oferta === 1
                             ? "bg-white text-red-700"
                             : "bg-slate-100 text-slate-500"
                         }`}
                       >
-                        {editForm.oferta === 1 ? "SIM" : "NÃO"}
+                        {!previewSobConsulta && editForm.oferta === 1 ? "SIM" : "NÃO"}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEditForm((prev) => {
+                          const nextSob = !prev.sob_consulta;
+                          return {
+                            ...prev,
+                            sob_consulta: nextSob,
+                            preco_por:
+                              !nextSob && (!prev.preco_por || prev.preco_por <= 0)
+                                ? 100
+                                : prev.preco_por
+                          };
+                        })
+                      }
+                      className={`col-span-2 p-2.5 rounded-xl border-2 font-black flex items-center justify-between transition ${
+                        previewSobConsulta
+                          ? "bg-slate-800 text-white border-slate-800 shadow-md"
+                          : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>PREÇO SOB CONSULTA (Cotação no WhatsApp)</span>
+                      </span>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full ${
+                          previewSobConsulta
+                            ? "bg-emerald-400 text-slate-950"
+                            : "bg-slate-100 text-slate-500"
+                        }`}
+                      >
+                        {previewSobConsulta ? "ATIVO" : "DESATIVADO"}
                       </span>
                     </button>
                   </div>
@@ -846,14 +925,19 @@ export default function AdminPage() {
                             Lançamento
                           </span>
                         )}
-                        {editForm.oferta === 1 && (
+                        {!previewSobConsulta && editForm.oferta === 1 && (
                           <span className="badge-discount text-white font-black text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">
                             Oferta
                           </span>
                         )}
+                        {previewSobConsulta && (
+                          <span className="bg-slate-800 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">
+                            Sob Consulta
+                          </span>
+                        )}
                       </div>
 
-                      {previewDescontoPix > 0 && (
+                      {!previewSobConsulta && previewDescontoPix > 0 && (
                         <div className="absolute top-3 right-3 z-10">
                           <span className="badge-pix text-white font-black text-[10px] px-2.5 py-0.5 rounded-full shadow">
                             {previewDescontoPix}% OFF PIX
@@ -883,26 +967,38 @@ export default function AdminPage() {
                       </p>
 
                       <div className="mt-3 pt-2.5 border-t border-slate-100">
-                        {editForm.oferta === 1 && previewPrecoDe > previewPrecoPor && (
-                          <span className="text-slate-400 line-through text-[11px] block">
-                            De {formatBRL(previewPrecoDe)}
+                        {previewSobConsulta ? (
+                          <span className="text-sm font-black text-blue-950 block">
+                            Preço sob consulta
                           </span>
+                        ) : (
+                          <>
+                            {editForm.oferta === 1 && previewPrecoDe > previewPrecoPor && (
+                              <span className="text-slate-400 line-through text-[11px] block">
+                                De {formatBRL(previewPrecoDe)}
+                              </span>
+                            )}
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-[11px] font-semibold text-emerald-700">
+                                Por
+                              </span>
+                              <span className="text-lg font-black text-emerald-600">
+                                {formatBRL(previewPrecoPix)}
+                              </span>
+                              <span className="text-[10px] font-bold text-emerald-700 uppercase">
+                                {previewDescontoPix > 0 ? "no Pix" : "à vista"}
+                              </span>
+                            </div>
+                            {previewMaxParcelas > 1 && (
+                              <div className="text-[11px] text-slate-600">
+                                ou em até{" "}
+                                <strong>
+                                  {previewMaxParcelas}x de {formatBRL(previewValorParcela)}
+                                </strong>
+                              </div>
+                            )}
+                          </>
                         )}
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-[11px] font-semibold text-emerald-700">Por</span>
-                          <span className="text-lg font-black text-emerald-600">
-                            {formatBRL(previewPrecoPix)}
-                          </span>
-                          <span className="text-[10px] font-bold text-emerald-700 uppercase">
-                            no Pix
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-slate-600">
-                          ou <strong>{formatBRL(previewPrecoPor)}</strong> em até{" "}
-                          <strong>
-                            {previewMaxParcelas}x de {formatBRL(previewValorParcela)}
-                          </strong>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -948,7 +1044,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Right Column: All Fields (Identity, Company/Brand, Pricing, Pix Discount, Installments, Descriptions) */}
+              {/* Right Column: All Fields */}
               <div className="lg:col-span-7 space-y-5">
                 {/* Block 1: Identificação & Empresa */}
                 <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-4">
@@ -1054,59 +1150,74 @@ export default function AdminPage() {
                 </div>
 
                 {/* Block 2: Preços, Desconto Pix & Parcelamento */}
-                <div className="bg-emerald-50/60 p-4 sm:p-5 rounded-2xl border border-emerald-200 space-y-4">
+                <div
+                  className={`p-4 sm:p-5 rounded-2xl border space-y-4 transition ${
+                    previewSobConsulta
+                      ? "bg-slate-100 border-slate-200 opacity-60"
+                      : "bg-emerald-50/60 border-emerald-200"
+                  }`}
+                >
                   <h3 className="font-black text-emerald-950 uppercase tracking-wider text-[11px] border-b border-emerald-200 pb-2 flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
                       <Percent className="w-3.5 h-3.5 text-emerald-700" />
                       <span>2. Preços, Desconto no Pix e Parcelamento</span>
                     </span>
                     <span className="text-emerald-700 font-black">
-                      Pix Final: {formatBRL(previewPrecoPix)}
+                      {previewSobConsulta
+                        ? "Modo Sob Consulta Ativo"
+                        : `À Vista: ${formatBRL(previewPrecoPix)}`}
                     </span>
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block font-bold text-slate-700 mb-1">
-                        Preço Base / Cartão (R$) *
+                        Preço de Venda (R$)
                       </label>
                       <input
                         type="number"
                         step="0.01"
                         min={0}
-                        required
+                        disabled={previewSobConsulta}
                         value={editForm.preco_por ?? 0}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const v = parseFloat(e.target.value) || 0;
                           setEditForm({
                             ...editForm,
-                            preco_por: parseFloat(e.target.value) || 0
-                          })
-                        }
-                        className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl font-black text-slate-900 text-sm"
+                            sob_consulta: v <= 0,
+                            preco_por: v
+                          });
+                        }}
+                        className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl font-black text-slate-900 text-sm disabled:bg-slate-100"
                       />
                     </div>
 
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <label className="font-bold text-slate-700">Preço &ldquo;De&rdquo; Riscado (R$)</label>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setEditForm({
-                              ...editForm,
-                              oferta: 1,
-                              preco_de: Number((previewPrecoPor * 1.15).toFixed(2))
-                            })
-                          }
-                          className="text-[10px] text-blue-900 font-bold hover:underline"
-                        >
-                          +15% auto
-                        </button>
+                        <label className="font-bold text-slate-700">
+                          Preço &ldquo;De&rdquo; Riscado (R$)
+                        </label>
+                        {!previewSobConsulta && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditForm({
+                                ...editForm,
+                                oferta: 1,
+                                preco_de: Number((previewPrecoPor * 1.15).toFixed(2))
+                              })
+                            }
+                            className="text-[10px] text-blue-900 font-bold hover:underline"
+                          >
+                            +15% auto
+                          </button>
+                        )}
                       </div>
                       <input
                         type="number"
                         step="0.01"
                         min={0}
+                        disabled={previewSobConsulta}
                         value={editForm.preco_de ?? 0}
                         onChange={(e) =>
                           setEditForm({
@@ -1114,33 +1225,35 @@ export default function AdminPage() {
                             preco_de: parseFloat(e.target.value) || 0
                           })
                         }
-                        className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-600 text-sm"
+                        className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-600 text-sm disabled:bg-slate-100"
                       />
                     </div>
 
                     <div>
                       <label className="block font-bold text-emerald-900 mb-1">
-                        Desconto no Pix (%)
+                        Desconto Extra no Pix (%)
                       </label>
                       <input
                         type="number"
                         step="1"
                         min={0}
                         max={90}
-                        value={editForm.desconto_pix ?? 10}
+                        disabled={previewSobConsulta}
+                        value={editForm.desconto_pix ?? 0}
                         onChange={(e) =>
                           setEditForm({
                             ...editForm,
                             desconto_pix: Math.max(0, Math.min(90, parseFloat(e.target.value) || 0))
                           })
                         }
-                        className="w-full px-3 py-2.5 bg-white border border-emerald-400 rounded-xl font-black text-emerald-700 text-sm"
+                        className="w-full px-3 py-2.5 bg-white border border-emerald-400 rounded-xl font-black text-emerald-700 text-sm disabled:bg-slate-100"
                       />
                       <div className="flex gap-1 mt-1.5">
                         {[0, 5, 10, 15, 20].map((pct) => (
                           <button
                             key={pct}
                             type="button"
+                            disabled={previewSobConsulta}
                             onClick={() => setEditForm({ ...editForm, desconto_pix: pct })}
                             className={`flex-1 py-0.5 rounded text-[10px] font-bold border ${
                               previewDescontoPix === pct
@@ -1163,18 +1276,19 @@ export default function AdminPage() {
                         <span>Parcelamento Máximo no Cartão</span>
                       </label>
                       <select
+                        disabled={previewSobConsulta}
                         value={previewMaxParcelas}
                         onChange={(e) => {
                           const maxP = parseInt(e.target.value) || 12;
                           setEditForm((prev) => ({
                             ...prev,
                             max_parcelas: maxP,
-                            parcelas_sem_juros: Math.min(maxP, prev.parcelas_sem_juros ?? 6)
+                            parcelas_sem_juros: Math.min(maxP, prev.parcelas_sem_juros ?? 1)
                           }));
                         }}
-                        className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800"
+                        className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 disabled:bg-slate-100"
                       >
-                        {[1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 18, 24].map((n) => (
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 18, 24].map((n) => (
                           <option key={n} value={n}>
                             Até {n}x de {formatBRL(previewPrecoPor / n)}
                           </option>
@@ -1184,9 +1298,10 @@ export default function AdminPage() {
 
                     <div>
                       <label className="block font-bold text-slate-700 mb-1">
-                        Parcelas Sem Juros (na página do produto)
+                        Parcelas Sem Juros
                       </label>
                       <select
+                        disabled={previewSobConsulta}
                         value={previewSemJuros}
                         onChange={(e) =>
                           setEditForm({
@@ -1194,11 +1309,11 @@ export default function AdminPage() {
                             parcelas_sem_juros: parseInt(e.target.value) || 1
                           })
                         }
-                        className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800"
+                        className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 disabled:bg-slate-100"
                       >
                         {Array.from({ length: previewMaxParcelas }, (_, i) => i + 1).map((n) => (
                           <option key={n} value={n}>
-                            Até {n}x sem juros de {formatBRL(previewValorSemJuros)}
+                            Até {n}x sem juros ({formatBRL(previewValorSemJuros)})
                           </option>
                         ))}
                       </select>

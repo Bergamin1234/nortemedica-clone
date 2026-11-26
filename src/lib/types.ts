@@ -29,9 +29,12 @@ export interface Product {
   imagem_url: string;
   destaque: number;
   lancamento: number;
+  sob_consulta?: boolean;
   oferta?: number;
   desconto_pix?: number;
   max_parcelas?: number;
+  valor_parcela?: number;
+  com_juros?: boolean;
   parcelas_sem_juros?: number;
   ativo: number;
   categoria_nome: string;
@@ -55,7 +58,10 @@ export interface ProductOverride {
   max_parcelas?: number;
   parcelas_sem_juros?: number;
   lancamento?: number;
+  sob_consulta?: boolean;
   oferta?: number;
+  valor_parcela?: number;
+  com_juros?: boolean;
   estoque?: number;
 }
 

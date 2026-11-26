@@ -121,7 +121,7 @@ export function CartDrawer() {
             <strong className="text-slate-800 text-sm">{formatBRL(subtotal)}</strong>
           </div>
           <div className="flex justify-between items-center text-xs font-semibold text-emerald-700 bg-emerald-50 p-2.5 rounded-lg border border-emerald-200">
-            <span>Total com Desconto no Pix (10%):</span>
+            <span>Total no Pix à vista:</span>
             <strong className="text-sm font-black">{formatBRL(totalPix)}</strong>
           </div>
 

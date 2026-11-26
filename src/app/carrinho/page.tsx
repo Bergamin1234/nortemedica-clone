@@ -151,10 +151,12 @@ export default function CarrinhoPage() {
                     <span>Subtotal:</span>
                     <strong className="text-slate-900 text-sm">{formatBRL(subtotal)}</strong>
                   </div>
-                  <div className="flex justify-between text-emerald-700 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
-                    <span className="font-semibold">Desconto no PIX (10%):</span>
-                    <strong className="font-black text-sm">- {formatBRL(pixDiscount)}</strong>
-                  </div>
+                  {pixDiscount > 0 && (
+                    <div className="flex justify-between text-emerald-700 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
+                      <span className="font-semibold">Desconto no PIX:</span>
+                      <strong className="font-black text-sm">- {formatBRL(pixDiscount)}</strong>
+                    </div>
+                  )}
                   <div className="flex justify-between pt-2 border-t border-slate-100">
                     <span className="font-bold text-slate-800 text-sm">Total no Cartão:</span>
                     <strong className="text-blue-950 text-lg font-black">

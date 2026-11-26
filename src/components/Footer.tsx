@@ -173,7 +173,7 @@ export function Footer() {
             <span className="block font-semibold text-white mb-2">Formas de Pagamento:</span>
             <div className="flex flex-wrap gap-2 text-[11px]">
               <span className="bg-blue-900/80 px-2.5 py-1 rounded text-emerald-400 font-bold flex items-center gap-1">
-                <QrCode className="w-3.5 h-3.5" aria-hidden="true" /> PIX 10% OFF
+                <QrCode className="w-3.5 h-3.5" aria-hidden="true" /> PIX à Vista
               </span>
               <span className="bg-blue-900/80 px-2.5 py-1 rounded text-white flex items-center gap-1">
                 <CreditCard className="w-3.5 h-3.5" aria-hidden="true" /> Cartão até 12x

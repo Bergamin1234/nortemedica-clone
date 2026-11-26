@@ -113,7 +113,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const totalItems = items.reduce((acc, i) => acc + i.quantity, 0);
   const subtotal = items.reduce((acc, i) => acc + i.product.preco_por * i.quantity, 0);
-  const pixDiscount = (subtotal * SITE_CONFIG.descontoPixPercentual) / 100;
+  const pixDiscount = items.reduce((acc, i) => {
+    const pct = i.product.desconto_pix ?? SITE_CONFIG.descontoPixPercentual;
+    return acc + (i.product.preco_por * i.quantity * pct) / 100;
+  }, 0);
   const totalPix = subtotal - pixDiscount;
 
   return (

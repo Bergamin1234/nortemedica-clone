@@ -161,7 +161,7 @@ export function Header() {
               <span className="text-slate-600" aria-hidden="true">|</span>
               <span className="flex items-center gap-1 text-yellow-400 font-semibold">
                 <Percent className="w-3.5 h-3.5" aria-hidden="true" />
-                10% OFF no Pix
+                Pix, Cartão até 12x &amp; PJ
               </span>
             </div>
           </div>

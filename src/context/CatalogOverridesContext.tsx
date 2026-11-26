@@ -17,20 +17,54 @@ interface CatalogOverridesContextValue {
 const CatalogOverridesContext = createContext<CatalogOverridesContextValue | null>(null);
 
 export function mergeProductWithOverride(product: Product, ov?: ProductOverride): Product {
-  const defaultOferta = product.preco_de > product.preco_por ? 1 : 0;
+  const baseSobConsulta = Boolean(product.sob_consulta || product.preco_por <= 0);
+  const baseOferta = !baseSobConsulta && product.preco_de > product.preco_por ? 1 : 0;
+
   if (!ov) {
     return {
       ...product,
-      oferta: product.oferta ?? defaultOferta,
+      sob_consulta: baseSobConsulta,
+      oferta: product.oferta ?? baseOferta,
       desconto_pix: product.desconto_pix ?? SITE_CONFIG.descontoPixPercentual,
       max_parcelas: product.max_parcelas ?? SITE_CONFIG.maxParcelasCartao,
       parcelas_sem_juros: product.parcelas_sem_juros ?? SITE_CONFIG.parcelasSemJuros
     };
   }
 
-  const precoPor = ov.preco_por ?? product.preco_por;
-  const precoDe = ov.preco_de ?? product.preco_de;
-  const oferta = ov.oferta !== undefined ? ov.oferta : precoDe > precoPor ? 1 : 0;
+  const precoPor = ov.preco_por !== undefined ? ov.preco_por : product.preco_por;
+  const precoDe = ov.preco_de !== undefined ? ov.preco_de : product.preco_de;
+  const sobConsulta =
+    ov.sob_consulta !== undefined ? ov.sob_consulta : precoPor <= 0 ? true : baseSobConsulta;
+  const oferta = sobConsulta
+    ? 0
+    : ov.oferta !== undefined
+      ? ov.oferta
+      : precoDe > precoPor
+        ? 1
+        : 0;
+
+  // If admin changed preco_por or max_parcelas manually, recalculate valor_parcela cleanly unless explicitly overridden
+  const maxParcelas =
+    ov.max_parcelas !== undefined
+      ? ov.max_parcelas
+      : (product.max_parcelas ?? SITE_CONFIG.maxParcelasCartao);
+  const priceOrInstallmentsChanged =
+    (ov.preco_por !== undefined && ov.preco_por !== product.preco_por) ||
+    (ov.max_parcelas !== undefined && ov.max_parcelas !== product.max_parcelas);
+
+  const valorParcela =
+    ov.valor_parcela !== undefined
+      ? ov.valor_parcela
+      : priceOrInstallmentsChanged
+        ? precoPor / Math.max(1, maxParcelas)
+        : (product.valor_parcela ?? precoPor / Math.max(1, maxParcelas));
+
+  const comJuros =
+    ov.com_juros !== undefined
+      ? ov.com_juros
+      : priceOrInstallmentsChanged
+        ? false
+        : Boolean(product.com_juros);
 
   return {
     ...product,
@@ -46,14 +80,14 @@ export function mergeProductWithOverride(product: Product, ov?: ProductOverride)
     imagem_url: ov.imagem_url !== undefined ? ov.imagem_url : product.imagem_url,
     preco_por: precoPor,
     preco_de: precoDe,
+    sob_consulta: sobConsulta,
     desconto_pix:
       ov.desconto_pix !== undefined
         ? ov.desconto_pix
         : (product.desconto_pix ?? SITE_CONFIG.descontoPixPercentual),
-    max_parcelas:
-      ov.max_parcelas !== undefined
-        ? ov.max_parcelas
-        : (product.max_parcelas ?? SITE_CONFIG.maxParcelasCartao),
+    max_parcelas: maxParcelas,
+    valor_parcela: valorParcela,
+    com_juros: comJuros,
     parcelas_sem_juros:
       ov.parcelas_sem_juros !== undefined
         ? ov.parcelas_sem_juros

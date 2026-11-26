@@ -27,16 +27,21 @@ export function ProductDetailClient({
 
   const precoPor = product.preco_por;
   const precoDe = product.preco_de;
-  const descontoPix = product.desconto_pix ?? SITE_CONFIG.descontoPixPercentual;
+  const isSobConsulta = Boolean(product.sob_consulta || precoPor <= 0);
+  const descontoPix = isSobConsulta ? 0 : (product.desconto_pix ?? SITE_CONFIG.descontoPixPercentual);
   const maxParcelas = Math.max(1, product.max_parcelas ?? SITE_CONFIG.maxParcelasCartao);
   const parcelasSemJuros = Math.max(
     1,
     Math.min(maxParcelas, product.parcelas_sem_juros ?? SITE_CONFIG.parcelasSemJuros)
   );
-  const precoPix = precoPor * (1 - descontoPix / 100);
-  const parcelaMax = precoPor / maxParcelas;
+  const precoFinalVista = precoPor * (1 - descontoPix / 100);
+  const parcelaMax =
+    product.valor_parcela && product.valor_parcela > 0
+      ? product.valor_parcela
+      : precoPor / maxParcelas;
   const parcelaSemJuros = precoPor / parcelasSemJuros;
-  const isOferta = product.oferta !== undefined ? product.oferta === 1 : precoDe > precoPor;
+  const isOferta =
+    !isSobConsulta && (product.oferta !== undefined ? product.oferta === 1 : precoDe > precoPor);
   const isLancamento = product.lancamento === 1;
 
   return (
@@ -78,8 +83,13 @@ export function ProductDetailClient({
                     Oferta Especial
                   </span>
                 )}
+                {isSobConsulta && (
+                  <span className="bg-slate-800 text-white font-black text-xs px-3 py-1 rounded-full uppercase tracking-wider shadow">
+                    Sob Consulta
+                  </span>
+                )}
               </div>
-              {descontoPix > 0 && (
+              {!isSobConsulta && descontoPix > 0 && (
                 <span className="absolute top-4 right-4 badge-pix text-white font-black text-xs px-3 py-1 rounded-full shadow">
                   {descontoPix}% OFF no PIX
                 </span>
@@ -115,8 +125,7 @@ export function ProductDetailClient({
                 </span>
                 <span className="text-slate-400 font-mono">Código: {product.sku}</span>
                 <span className="text-emerald-700 bg-emerald-50 font-bold px-2.5 py-0.5 rounded-full text-[11px] flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Em Estoque (
-                  {product.estoque} un.)
+                  <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Disponível
                 </span>
               </div>
 
@@ -130,29 +139,57 @@ export function ProductDetailClient({
             </div>
 
             <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2.5">
-              {isOferta && precoDe > precoPor && (
-                <span className="text-xs text-slate-400 line-through block">
-                  De {formatBRL(precoDe)}
-                </span>
+              {isSobConsulta ? (
+                <>
+                  <span className="text-2xl sm:text-3xl font-black text-blue-950 block">
+                    Preço sob consulta
+                  </span>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Solicite orçamento personalizado para hospitais, clínicas, consultórios,
+                    laboratórios e processos de licitação pública pelo WhatsApp{" "}
+                    <strong>{SITE_CONFIG.whatsappFormatado}</strong> ou telefone{" "}
+                    <strong>{SITE_CONFIG.telefone}</strong>.
+                  </p>
+                </>
+              ) : (
+                <>
+                  {isOferta && precoDe > precoPor && (
+                    <span className="text-xs text-slate-400 line-through block">
+                      De {formatBRL(precoDe)}
+                    </span>
+                  )}
+
+                  <div className="flex flex-wrap items-baseline gap-2">
+                    <span className="text-sm font-semibold text-emerald-700">por:</span>
+                    <span className="text-3xl sm:text-4xl font-black text-emerald-600">
+                      {formatBRL(precoFinalVista)}
+                    </span>
+                    <span className="text-xs font-bold text-emerald-700 uppercase bg-emerald-100 px-2 py-0.5 rounded">
+                      {descontoPix > 0 ? `à vista no Pix (${descontoPix}% OFF)` : "à vista"}
+                    </span>
+                  </div>
+
+                  {maxParcelas > 1 && (
+                    <div className="text-xs text-slate-600">
+                      {descontoPix > 0 ? (
+                        <>
+                          ou <strong>{formatBRL(precoPor)}</strong> em até{" "}
+                        </>
+                      ) : (
+                        <>ou por </>
+                      )}
+                      <strong>
+                        {maxParcelas}x de {formatBRL(parcelaMax)}
+                      </strong>{" "}
+                      {product.com_juros
+                        ? "com juros"
+                        : parcelasSemJuros > 1
+                          ? `(até ${parcelasSemJuros}x sem juros de ${formatBRL(parcelaSemJuros)})`
+                          : ""}
+                    </div>
+                  )}
+                </>
               )}
-
-              <div className="flex flex-wrap items-baseline gap-2">
-                <span className="text-sm font-semibold text-emerald-700">Por</span>
-                <span className="text-3xl sm:text-4xl font-black text-emerald-600">
-                  {formatBRL(precoPix)}
-                </span>
-                <span className="text-xs font-bold text-emerald-700 uppercase bg-emerald-100 px-2 py-0.5 rounded">
-                  à vista no Pix ({descontoPix}% OFF)
-                </span>
-              </div>
-
-              <div className="text-xs text-slate-600">
-                ou <strong>{formatBRL(precoPor)}</strong> em até{" "}
-                <strong>
-                  {maxParcelas}x de {formatBRL(parcelaMax)}
-                </strong>{" "}
-                (até {parcelasSemJuros}x sem juros de {formatBRL(parcelaSemJuros)}).
-              </div>
             </div>
 
             <ProductBuyActions product={product} />
@@ -170,7 +207,7 @@ export function ProductDetailClient({
 
           <div className="space-y-8 text-sm text-slate-700 leading-relaxed">
             <div>
-              <h3 className="font-bold text-slate-900 text-base mb-2">Visão Geral</h3>
+              <h3 className="font-bold text-slate-900 text-base mb-2">Descrição do Produto</h3>
               <p className="whitespace-pre-line">{product.descricao_longa}</p>
             </div>
 
@@ -206,7 +243,10 @@ export function ProductDetailClient({
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {related.map((rel) => {
-                const relDescontoPix = rel.desconto_pix ?? SITE_CONFIG.descontoPixPercentual;
+                const relSobConsulta = Boolean(rel.sob_consulta || rel.preco_por <= 0);
+                const relDescontoPix = relSobConsulta
+                  ? 0
+                  : (rel.desconto_pix ?? SITE_CONFIG.descontoPixPercentual);
                 const relPixPrice = rel.preco_por * (1 - relDescontoPix / 100);
                 return (
                   <Link
@@ -230,8 +270,16 @@ export function ProductDetailClient({
                         {rel.nome}
                       </h3>
                       <div className="text-sm font-black text-emerald-600 mt-2">
-                        {formatBRL(relPixPrice)}{" "}
-                        <span className="text-[10px] font-normal text-slate-500">no Pix</span>
+                        {relSobConsulta ? (
+                          <span className="text-blue-950 text-xs">Preço sob consulta</span>
+                        ) : (
+                          <>
+                            {formatBRL(relPixPrice)}{" "}
+                            <span className="text-[10px] font-normal text-slate-500">
+                              {relDescontoPix > 0 ? "no Pix" : "à vista"}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </Link>

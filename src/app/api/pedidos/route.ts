@@ -20,7 +20,12 @@ export async function POST(request: NextRequest) {
     );
 
     const metodo = (body.metodo_pagamento || "PIX") as "PIX" | "CARTAO" | "BOLETO";
-    const desconto = metodo === "PIX" ? (subtotal * SITE_CONFIG.descontoPixPercentual) / 100 : 0;
+    const desconto =
+      metodo === "PIX"
+        ? body.desconto_pix_total !== undefined
+          ? Math.max(0, Number(body.desconto_pix_total))
+          : (subtotal * SITE_CONFIG.descontoPixPercentual) / 100
+        : 0;
     const freteValor = Number(body.frete_valor || 0);
     const total = subtotal - desconto + freteValor;
 

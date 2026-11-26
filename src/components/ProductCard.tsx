@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye, MessageCircle } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { formatBRL, SITE_CONFIG } from "@/lib/constants";
 import { useCatalogOverrides } from "@/context/CatalogOverridesContext";
@@ -13,12 +13,21 @@ export function ProductCard({ product: rawProduct }: { product: Product }) {
 
   const precoPor = product.preco_por;
   const precoDe = product.preco_de;
-  const descontoPix = product.desconto_pix ?? SITE_CONFIG.descontoPixPercentual;
+  const isSobConsulta = Boolean(product.sob_consulta || precoPor <= 0);
+  const descontoPix = isSobConsulta ? 0 : (product.desconto_pix ?? SITE_CONFIG.descontoPixPercentual);
   const maxParcelas = Math.max(1, product.max_parcelas ?? SITE_CONFIG.maxParcelasCartao);
-  const precoPix = precoPor * (1 - descontoPix / 100);
-  const parcelaValor = precoPor / maxParcelas;
-  const isOferta = product.oferta !== undefined ? product.oferta === 1 : precoDe > precoPor;
+  const precoFinalVista = precoPor * (1 - descontoPix / 100);
+  const parcelaValor =
+    product.valor_parcela && product.valor_parcela > 0
+      ? product.valor_parcela
+      : precoPor / maxParcelas;
+  const isOferta =
+    !isSobConsulta && (product.oferta !== undefined ? product.oferta === 1 : precoDe > precoPor);
   const isLancamento = product.lancamento === 1;
+
+  const whatsMsg = encodeURIComponent(
+    `Olá! Gostaria de consultar o preço e condições do produto: ${product.nome} (Código: ${product.sku})`
+  );
 
   return (
     <article className="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col justify-between shadow-sm relative group">
@@ -35,9 +44,14 @@ export function ProductCard({ product: rawProduct }: { product: Product }) {
               Oferta
             </span>
           )}
+          {isSobConsulta && (
+            <span className="bg-slate-800 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">
+              Sob Consulta
+            </span>
+          )}
         </div>
 
-        {descontoPix > 0 && (
+        {!isSobConsulta && descontoPix > 0 && (
           <div className="absolute top-3 right-3 z-10">
             <span className="badge-pix text-white font-black text-[10px] px-2.5 py-0.5 rounded-full shadow">
               {descontoPix}% OFF PIX
@@ -75,29 +89,67 @@ export function ProductCard({ product: rawProduct }: { product: Product }) {
           <p className="text-xs text-slate-500 mt-1 line-clamp-2">{product.descricao_curta}</p>
         </div>
 
-        {/* Prices */}
+        {/* Prices or Sob Consulta */}
         <div className="mt-4 pt-3 border-t border-slate-100">
-          {isOferta && precoDe > precoPor && (
-            <span className="text-slate-400 line-through text-xs block">
-              De {formatBRL(precoDe)}
-            </span>
+          {isSobConsulta ? (
+            <div className="py-1">
+              <span className="text-base font-black text-blue-950 block">Preço sob consulta</span>
+              <span className="text-[11px] text-slate-500 block mt-0.5">
+                Cotação rápida p/ hospitais, clínicas e PJ
+              </span>
+            </div>
+          ) : (
+            <>
+              {isOferta && precoDe > precoPor && (
+                <span className="text-slate-400 line-through text-xs block">
+                  De {formatBRL(precoDe)}
+                </span>
+              )}
+
+              <div className="flex items-baseline space-x-1.5">
+                <span className="text-xs font-semibold text-emerald-700">Por</span>
+                <span className="text-xl font-black text-emerald-600">
+                  {formatBRL(precoFinalVista)}
+                </span>
+                <span className="text-[10px] font-bold text-emerald-700 uppercase">
+                  {descontoPix > 0 ? "no Pix" : "à vista"}
+                </span>
+              </div>
+
+              {maxParcelas > 1 ? (
+                <div className="text-[11px] text-slate-600 mt-0.5">
+                  {descontoPix > 0 ? (
+                    <>
+                      ou <strong>{formatBRL(precoPor)}</strong> em até{" "}
+                    </>
+                  ) : (
+                    <>ou em até </>
+                  )}
+                  <strong>
+                    {maxParcelas}x de {formatBRL(parcelaValor)}
+                  </strong>
+                  {product.com_juros ? " c/ juros" : ""}
+                </div>
+              ) : (
+                <div className="text-[11px] text-slate-500 mt-0.5">Pagamento à vista no Pix ou Cartão</div>
+              )}
+            </>
           )}
 
-          <div className="flex items-baseline space-x-1.5">
-            <span className="text-xs font-semibold text-emerald-700">Por</span>
-            <span className="text-xl font-black text-emerald-600">{formatBRL(precoPix)}</span>
-            <span className="text-[10px] font-bold text-emerald-700 uppercase">no Pix</span>
-          </div>
-
-          <div className="text-[11px] text-slate-600 mt-0.5">
-            ou <strong>{formatBRL(precoPor)}</strong> em até{" "}
-            <strong>
-              {maxParcelas}x de {formatBRL(parcelaValor)}
-            </strong>
-          </div>
-
           <div className="mt-4 flex gap-2">
-            <AddToCartButton product={product} />
+            {isSobConsulta ? (
+              <a
+                href={`https://wa.me/${SITE_CONFIG.whatsapp}?text=${whatsMsg}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm"
+              >
+                <MessageCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span>Consultar Preço</span>
+              </a>
+            ) : (
+              <AddToCartButton product={product} />
+            )}
             <Link
               href={`/produto/${product.slug}`}
               aria-label={`Ver detalhes de ${product.nome}`}

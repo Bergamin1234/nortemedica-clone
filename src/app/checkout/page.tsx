@@ -90,6 +90,7 @@ export default function CheckoutPage() {
         estado,
         frete_tipo: selectedShipping?.nome || "PAC - Encomenda Econômica",
         frete_valor: freteValor,
+        desconto_pix_total: pixDiscount,
         metodo_pagamento: metodo,
         cartao_parcelas: cartaoParcelas,
         observacoes,
@@ -426,7 +427,7 @@ export default function CheckoutPage() {
                     <QrCode className="w-5 h-5 text-emerald-600" />
                     <span>PIX</span>
                     <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                      10% OFF
+                      À vista
                     </span>
                   </button>
 
@@ -461,7 +462,7 @@ export default function CheckoutPage() {
 
                 {metodo === "PIX" && (
                   <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-900 space-y-1">
-                    <p className="font-bold">Pagamento instantâneo com 10% de desconto!</p>
+                    <p className="font-bold">Pagamento instantâneo via PIX!</p>
                     <p>
                       Ao finalizar, exibiremos o QR Code e o código Pix Copia e Cola imediatamente.
                     </p>
@@ -555,7 +556,7 @@ export default function CheckoutPage() {
                   </div>
                   {descontoAplicado > 0 && (
                     <div className="flex justify-between text-emerald-700 font-bold bg-emerald-50 p-2 rounded-xl border border-emerald-200">
-                      <span>Desconto Pix (10%):</span>
+                      <span>Desconto Pix:</span>
                       <strong>- {formatBRL(descontoAplicado)}</strong>
                     </div>
                   )}

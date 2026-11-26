@@ -135,15 +135,15 @@ export default async function HomePage({ searchParams }: HomeProps) {
               <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <QrCode className="w-7 h-7 text-emerald-600 shrink-0" aria-hidden="true" />
                 <div className="text-xs">
-                  <strong className="text-slate-800 block font-bold">10% de Desconto no PIX</strong>
-                  <span className="text-slate-500">Economia imediata à vista</span>
+                  <strong className="text-slate-800 block font-bold">Pagamento Rápido no PIX</strong>
+                  <span className="text-slate-500">Aprovação imediata à vista</span>
                 </div>
               </div>
               <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <CreditCard className="w-7 h-7 text-blue-900 shrink-0" aria-hidden="true" />
                 <div className="text-xs">
                   <strong className="text-slate-800 block font-bold">Até 12x no Cartão</strong>
-                  <span className="text-slate-500">Até 6x sem juros</span>
+                  <span className="text-slate-500">Parcelamento facilitado</span>
                 </div>
               </div>
               <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
